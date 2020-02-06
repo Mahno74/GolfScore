@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Collections.Generic;
 using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
@@ -222,12 +223,12 @@ namespace GolfScore
         private void OutputResultToTextBox(object sender, EventArgs e) //в текстовый модуль
         {
             textBox1.Clear();
-            Player[] player = new Player[NumberOfPlayer()];
+            List<Player> players = new List<Player>();
 
-            for (int i = 0; i < player.Length; i++)
-                player[i] = new Player(PlayerName(i), PlayerGain(i));
-            foreach (Player p in player)
-                textBox1.Text += p.Name + " " + p.Money.ToString("N1") + "\r\n";
+            for (int i = 0; i < NumberOfPlayer(); i++)
+                players.Add(new Player(PlayerName(i), PlayerGain(i)));
+            foreach (Player player in players)
+                textBox1.Text += player.ToString();
         }
 
         //получение данных 

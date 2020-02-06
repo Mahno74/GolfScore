@@ -15,5 +15,9 @@ namespace GolfScore
             Name = name;
             Money = money;
         }
+        public override string ToString()
+        {
+            return Name + " " + Money.ToString("N1") + "\r\n";
+        }
     }
 }
