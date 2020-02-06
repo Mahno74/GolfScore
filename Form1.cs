@@ -2,16 +2,15 @@
 using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace GolfScore
 {
     public partial class Form1 : Form
     {
-        private readonly OleDbConnection _connection =
-            new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=golfData.mdb");
+        private readonly OleDbConnection _connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=golfData.mdb");
 
-        private readonly DataTable _table = new DataTable();
         private OleDbCommand _command;
         private int _gamersNumb = 1;
         private OleDbDataReader _reader;
@@ -27,10 +26,10 @@ namespace GolfScore
             //set combobox with strokes
             for (var i = 5; i < 30; i++)
             {
+                comboBoxP0score.Items.Add(i);
                 comboBoxP1score.Items.Add(i);
                 comboBoxP2score.Items.Add(i);
                 comboBoxP3score.Items.Add(i);
-                comboBoxP4score.Items.Add(i);
             }
 
             //set combobox with players
@@ -40,10 +39,10 @@ namespace GolfScore
             _reader = _command.ExecuteReader();
             while (_reader.Read())
             {
+                comboBox0.Items.Add(_reader.GetValue(0));
                 comboBox1.Items.Add(_reader.GetValue(0));
                 comboBox2.Items.Add(_reader.GetValue(0));
                 comboBox3.Items.Add(_reader.GetValue(0));
-                comboBox4.Items.Add(_reader.GetValue(0));
             }
 
             _reader.Close();
@@ -56,6 +55,31 @@ namespace GolfScore
         {
             _gamersNumb = 0;
             //1
+            if (comboBox0.Text == "")
+            {
+                comboBoxP0score.Text = @"0";
+                comboBoxP0score.Enabled = false;
+                comboBox1.Enabled = false;
+                comboBox1.SelectedIndex = -1;
+                comboBoxP1score.Text = @"0";
+                comboBox2.Enabled = false;
+                comboBox2.SelectedIndex = -1;
+                comboBoxP2score.Text = @"0";
+                comboBox3.Enabled = false;
+                comboBox3.SelectedIndex = -1;
+                comboBoxP3score.Text = @"0";
+            }
+            else
+            {
+                comboBoxP0score.Enabled = true;
+                comboBox1.Enabled = true;
+                _gamersNumb = 1;
+                comboBox1.Items.Remove(comboBox0.SelectedItem);
+                comboBox2.Items.Remove(comboBox0.SelectedItem);
+                comboBox3.Items.Remove(comboBox0.SelectedItem);
+            }
+
+            //2
             if (comboBox1.Text == "")
             {
                 comboBoxP1score.Text = @"0";
@@ -66,21 +90,17 @@ namespace GolfScore
                 comboBox3.Enabled = false;
                 comboBox3.SelectedIndex = -1;
                 comboBoxP3score.Text = @"0";
-                comboBox4.Enabled = false;
-                comboBox4.SelectedIndex = -1;
-                comboBoxP4score.Text = @"0";
             }
             else
             {
                 comboBoxP1score.Enabled = true;
                 comboBox2.Enabled = true;
-                _gamersNumb = 1;
+                _gamersNumb = 2;
                 comboBox2.Items.Remove(comboBox1.SelectedItem);
                 comboBox3.Items.Remove(comboBox1.SelectedItem);
-                comboBox4.Items.Remove(comboBox1.SelectedItem);
             }
 
-            //2
+            //3
             if (comboBox2.Text == "")
             {
                 comboBoxP2score.Text = @"0";
@@ -88,60 +108,40 @@ namespace GolfScore
                 comboBox3.Enabled = false;
                 comboBox3.SelectedIndex = -1;
                 comboBoxP3score.Text = @"0";
-                comboBox4.Enabled = false;
-                comboBox4.SelectedIndex = -1;
-                comboBoxP4score.Text = @"0";
             }
             else
             {
                 comboBoxP2score.Enabled = true;
                 comboBox3.Enabled = true;
-                _gamersNumb = 2;
+                _gamersNumb = 3;
                 comboBox3.Items.Remove(comboBox2.SelectedItem);
-                comboBox4.Items.Remove(comboBox2.SelectedItem);
             }
 
-            //3
+            //4
             if (comboBox3.Text == "")
             {
                 comboBoxP3score.Text = @"0";
                 comboBoxP3score.Enabled = false;
-                comboBox4.Enabled = false;
-                comboBox4.SelectedIndex = -1;
-                comboBoxP4score.Text = @"0";
             }
             else
             {
                 comboBoxP3score.Enabled = true;
-                comboBox4.Enabled = true;
-                _gamersNumb = 3;
-                comboBox4.Items.Remove(comboBox3.SelectedItem);
-            }
-
-            //4
-            if (comboBox4.Text == "")
-            {
-                comboBoxP4score.Text = @"0";
-                comboBoxP4score.Enabled = false;
-            }
-            else
-            {
-                comboBoxP4score.Enabled = true;
                 _gamersNumb = 4;
             }
         }
 
-        private void ToolStripButtonSave_Click(object sender, EventArgs e) //saving
+        //вывод результатов
+        private void OutputResultToDataBase(object sender, EventArgs e) //в базу данных
         {
             var gamersNumb = 0;
             double player1Reward, player2Reward, player3Reward;
             var bet = Convert.ToInt32(TextBoxBet.Text); //get a bet
+            if (comboBox0.Text != "") gamersNumb++;
             if (comboBox1.Text != "") gamersNumb++;
             if (comboBox2.Text != "") gamersNumb++;
             if (comboBox3.Text != "") gamersNumb++;
-            if (comboBox4.Text != "") gamersNumb++;
-            var avg = (Convert.ToDouble(comboBoxP1score.Text) + Convert.ToDouble(comboBoxP2score.Text) +
-                       Convert.ToDouble(comboBoxP3score.Text) + Convert.ToDouble(comboBoxP4score.Text)) /
+            var avg = (Convert.ToDouble(comboBoxP0score.Text) + Convert.ToDouble(comboBoxP1score.Text) +
+                       Convert.ToDouble(comboBoxP2score.Text) + Convert.ToDouble(comboBoxP3score.Text)) /
                       Convert.ToDouble(gamersNumb); //get average strikes
 
             switch (gamersNumb)
@@ -149,60 +149,60 @@ namespace GolfScore
                 case 1:
                     break;
                 case 2:
-                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) *
+                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP0score.Text)) *
                                     Convert.ToDouble(bet);
-                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) *
+                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) *
                                     Convert.ToDouble(bet);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox1.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox0.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player1Reward) + "')";
                     SaveDate(_request);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox2.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox1.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player2Reward) + "')";
                     SaveDate(_request);
                     MessageBox.Show(@"Saving successful");
                     break;
                 case 3:
-                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) *
+                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP0score.Text)) *
                                     Convert.ToDouble(bet);
-                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) *
+                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) *
                                     Convert.ToDouble(bet);
-                    player3Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP3score.Text)) *
+                    player3Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) *
                                     Convert.ToDouble(bet);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox1.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox0.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player1Reward) + "')";
                     SaveDate(_request);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox2.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox1.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player2Reward) + "')";
                     SaveDate(_request);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox3.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox2.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player3Reward) + "')";
                     SaveDate(_request);
                     MessageBox.Show(@"Saving successful");
                     break;
                 case 4:
-                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) * Convert.ToDouble(bet);
-                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) * Convert.ToDouble(bet);
-                    player3Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP3score.Text)) * Convert.ToDouble(bet);
-                    var player4Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP4score.Text)) * Convert.ToDouble(bet);
+                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP0score.Text)) * Convert.ToDouble(bet);
+                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) * Convert.ToDouble(bet);
+                    player3Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) * Convert.ToDouble(bet);
+                    var player4Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP3score.Text)) * Convert.ToDouble(bet);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox1.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox0.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player1Reward) + "')";
                     SaveDate(_request);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox2.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox1.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player2Reward) + "')";
                     SaveDate(_request);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox3.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox2.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player3Reward) + "')";
                     SaveDate(_request);
                     _request = "INSERT INTO score ([Имя], [Дата], [Сумма]) " +
-                               " VALUES ('" + comboBox4.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
+                               " VALUES ('" + comboBox3.Text + "', '" + DateTime.Now.ToShortDateString() + "', '" +
                                Math.Round(player4Reward) + "')";
                     SaveDate(_request);
                     MessageBox.Show(@"Saving successful");
@@ -219,46 +219,51 @@ namespace GolfScore
                     }
             }
         }
-
-        private void ComboBox_score_TextChanged(object sender, EventArgs e)
+        private void OutputResultToTextBox(object sender, EventArgs e) //в текстовый модуль
         {
-            double player1Reward, player2Reward, player3Reward;
-            var bet = Convert.ToInt32(TextBoxBet.Text); //getting bet
-            var avg = (Convert.ToDouble(comboBoxP1score.Text) + Convert.ToDouble(comboBoxP2score.Text) +
-                       Convert.ToDouble(comboBoxP3score.Text) + Convert.ToDouble(comboBoxP4score.Text)) /
-                      Convert.ToDouble(_gamersNumb);
+            textBox1.Clear();
+            Player[] player = new Player[NumberOfPlayer()];
 
-            switch (_gamersNumb)
-            {
-                case 1:
-                    break;
-                case 2:
-                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) * Convert.ToDouble(bet);
-                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) * Convert.ToDouble(bet);
-                    textBox1.Text = comboBox1.Text + "\t\t" + Math.Round(player1Reward) + Environment.NewLine +
-                                    comboBox2.Text + "\t\t" + Math.Round(player2Reward);
-                    break;
-                case 3:
-                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) * Convert.ToDouble(bet);
-                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) * Convert.ToDouble(bet);
-                    player3Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP3score.Text)) * Convert.ToDouble(bet);
-                    textBox1.Text = comboBox1.Text + "\t\t" + Math.Round(player1Reward) + Environment.NewLine +
-                                    comboBox2.Text + "\t\t" + Math.Round(player2Reward) + Environment.NewLine +
-                                    comboBox3.Text + "\t\t" + Math.Round(player3Reward);
-                    break;
-                case 4:
-                    player1Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP1score.Text)) * Convert.ToDouble(bet);
-                    player2Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP2score.Text)) * Convert.ToDouble(bet);
-                    player3Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP3score.Text)) * Convert.ToDouble(bet);
-                    var player4Reward = (Convert.ToDouble(avg) - Convert.ToDouble(comboBoxP4score.Text)) * Convert.ToDouble(bet);
-                    textBox1.Text = comboBox1.Text + "\t\t" + Math.Round(player1Reward) + Environment.NewLine +
-                                    comboBox2.Text + "\t\t" + Math.Round(player2Reward) + Environment.NewLine +
-                                    comboBox3.Text + "\t\t" + Math.Round(player3Reward) + Environment.NewLine +
-                                    comboBox4.Text + "\t\t" + Math.Round(player4Reward);
-                    break;
-            }
+            for (int i = 0; i < player.Length; i++)
+                player[i] = new Player(PlayerName(i), PlayerGain(i));
+            foreach (Player p in player)
+                textBox1.Text += p.Name + " " + p.Money.ToString("N1") + "\r\n";
         }
 
+        //получение данных 
+        private int NumberOfPlayer() //получаем количество игроков
+        {
+            int players = 0;
+            foreach (var cb in groupBox2.Controls.OfType<ComboBox>())
+            {
+                double.TryParse(cb.Text, out double score);
+                if (score > 0) players++;
+
+            }
+            return players;
+        }
+        private string PlayerName(int i) //получаем имя игрока из комбобокса по его номеру
+        {
+            return (groupBox1.Controls["comboBox" + i.ToString()] as ComboBox).Text;
+        }
+        private double PlayerGain(int i) //получаем выигрыш игрока по его номеру
+        {
+            // среднее количество ударов
+            double AverageStroke()
+            {
+                double summ = 0;
+                foreach (var cb in groupBox2.Controls.OfType<ComboBox>())
+                {
+                    double.TryParse(cb.Text, out double score);
+                    summ += score;
+                }
+                return summ / NumberOfPlayer();
+            }
+            //цена за удар
+            double bet = Convert.ToDouble(TextBoxBet.Text); 
+            //сумма выигрыша
+            return (AverageStroke() - Convert.ToDouble((groupBox2.Controls["comboBoxP" + i.ToString() + "score"] as ComboBox).Text)) * bet;
+        }
 
         private void ToolStripStatButton_Click(object sender, EventArgs e) //получаем статистику
         {
@@ -282,5 +287,8 @@ namespace GolfScore
             _reader.Close();
             _connection.Close();
         }
+
     }
+
+
 }
