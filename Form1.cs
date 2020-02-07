@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Data;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
@@ -140,12 +140,8 @@ namespace GolfScore
         private void OutputResultToTextBox(object sender, EventArgs e) //в текстовый модуль
         {
             textBox1.Clear();
-            List<Player> players = new List<Player>();
-
             for (int i = 0; i < NumberOfPlayer(); i++)
-                players.Add(new Player(PlayerName(i), PlayerGain(i)));
-            foreach (Player player in players)
-                textBox1.Text += player.ToString();
+                textBox1.Text += new Player(PlayerName(i), PlayerGain(i)).ToString();
         }
 
         //получение данных 
@@ -178,7 +174,7 @@ namespace GolfScore
                 return summ / NumberOfPlayer();
             }
             //цена за удар
-            double bet = Convert.ToDouble(TextBoxBet.Text); 
+            double bet = Convert.ToDouble(TextBoxBet.Text);
             //сумма выигрыша
             return (AverageStroke() - Convert.ToDouble((groupBox2.Controls["comboBoxP" + i.ToString() + "score"] as ComboBox).Text)) * bet;
         }
@@ -200,7 +196,7 @@ namespace GolfScore
             _command = new OleDbCommand(_request, _connection);
             _reader = _command.ExecuteReader();
             while (_reader.Read())
-                textBox1.Text += (string) _reader.GetValue(0) + "\t\t" + Convert.ToString(_reader.GetValue(1)) +
+                textBox1.Text += (string)_reader.GetValue(0) + "\t\t" + Convert.ToString(_reader.GetValue(1)) +
                                  Environment.NewLine;
             _reader.Close();
             _connection.Close();
