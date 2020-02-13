@@ -97,7 +97,6 @@
             // TextBoxBet
             // 
             this.TextBoxBet.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TextBoxBet.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.TextBoxBet.Margin = new System.Windows.Forms.Padding(1, 5, 1, 5);
             this.TextBoxBet.Name = "TextBoxBet";
             this.TextBoxBet.Size = new System.Drawing.Size(23, 23);
@@ -127,7 +126,8 @@
             this.comboBox0.Name = "comboBox0";
             this.comboBox0.Size = new System.Drawing.Size(160, 24);
             this.comboBox0.TabIndex = 1;
-            this.comboBox0.TextChanged += new System.EventHandler(this.ComboBoxPlayers_TextChanged);
+            this.comboBox0.DropDownClosed += new System.EventHandler(this.ComboBoxPlayers_Select);
+            this.comboBox0.TextChanged += new System.EventHandler(this.ComboBoxPlayers_Select);
             // 
             // groupBox1
             // 
@@ -151,7 +151,8 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(160, 24);
             this.comboBox1.TabIndex = 12;
-            this.comboBox1.TextChanged += new System.EventHandler(this.ComboBoxPlayers_TextChanged);
+            this.comboBox1.DropDownClosed += new System.EventHandler(this.ComboBoxPlayers_Select);
+            this.comboBox1.TextChanged += new System.EventHandler(this.ComboBoxPlayers_Select);
             // 
             // comboBox3
             // 
@@ -161,7 +162,8 @@
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(160, 24);
             this.comboBox3.TabIndex = 4;
-            this.comboBox3.TextChanged += new System.EventHandler(this.ComboBoxPlayers_TextChanged);
+            this.comboBox3.DropDownClosed += new System.EventHandler(this.ComboBoxPlayers_Select);
+            this.comboBox3.TextChanged += new System.EventHandler(this.ComboBoxPlayers_Select);
             // 
             // comboBox2
             // 
@@ -171,7 +173,8 @@
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(160, 24);
             this.comboBox2.TabIndex = 4;
-            this.comboBox2.TextChanged += new System.EventHandler(this.ComboBoxPlayers_TextChanged);
+            this.comboBox2.DropDownClosed += new System.EventHandler(this.ComboBoxPlayers_Select);
+            this.comboBox2.TextChanged += new System.EventHandler(this.ComboBoxPlayers_Select);
             // 
             // groupBox2
             // 
@@ -190,7 +193,6 @@
             // 
             // comboBoxP0score
             // 
-            this.comboBoxP0score.Enabled = false;
             this.comboBoxP0score.FormattingEnabled = true;
             this.comboBoxP0score.Location = new System.Drawing.Point(16, 19);
             this.comboBoxP0score.Name = "comboBoxP0score";
@@ -223,7 +225,6 @@
             // 
             // comboBoxP1score
             // 
-            this.comboBoxP1score.Enabled = false;
             this.comboBoxP1score.FormattingEnabled = true;
             this.comboBoxP1score.Location = new System.Drawing.Point(16, 57);
             this.comboBoxP1score.Name = "comboBoxP1score";

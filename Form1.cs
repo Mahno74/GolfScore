@@ -10,21 +10,11 @@ namespace GolfScore
 {
     public partial class Form1 : Form
     {
-        private readonly OleDbConnection _connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=golfData.mdb");
-
-        private OleDbCommand _command;
-        private int _gamersNumb = 1;
-        private OleDbDataReader _reader;
-        private string _request;
-
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
+        public static string path = "Provider=Microsoft.Jet.OLEDB.4.0; Data Source=golfData.mdb"; //путь к базе данных
+        public Form1() => InitializeComponent();
         private void Form1_Load(object sender, EventArgs e)
         {
-            //set combobox with strokes
+            //Наполняем комбобоксы с количеством ударов
             for (var i = 5; i < 30; i++)
             {
                 comboBoxP0score.Items.Add(i);
@@ -32,118 +22,69 @@ namespace GolfScore
                 comboBoxP2score.Items.Add(i);
                 comboBoxP3score.Items.Add(i);
             }
-
-            //set combobox with players
-            _request = "Select DISTINCT Имя From score";
-            _connection.Open();
-            _command = new OleDbCommand(_request, _connection);
-            _reader = _command.ExecuteReader();
-            while (_reader.Read())
+            //Наполняем комбобоксы с игроками
+            using (OleDbConnection connection = new OleDbConnection(path))
             {
-                comboBox0.Items.Add(_reader.GetValue(0));
-                comboBox1.Items.Add(_reader.GetValue(0));
-                comboBox2.Items.Add(_reader.GetValue(0));
-                comboBox3.Items.Add(_reader.GetValue(0));
+                connection.Open();
+                string request = "Select DISTINCT Имя From score";
+                OleDbCommand command = new OleDbCommand(request, connection);
+                OleDbDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    comboBox0.Items.Add(reader.GetValue(0));
+                    comboBox1.Items.Add(reader.GetValue(0));
+                    comboBox2.Items.Add(reader.GetValue(0));
+                    comboBox3.Items.Add(reader.GetValue(0));
+                }
+                reader.Close();
             }
-
-            _reader.Close();
-            _connection.Close();
         }
-
-
-        //management of the display and content of the fields associated with the number of selected players
-        private void ComboBoxPlayers_TextChanged(object sender, EventArgs e)
+        //управляем количеством игроков активируя поля
+        private void ComboBoxPlayers_Select(object sender, EventArgs e)
         {
-            _gamersNumb = 0;
-            //1
-            if (comboBox0.Text == "")
+            //3 игрока
+            if (comboBox1.Text != "")
             {
-                comboBoxP0score.Text = @"0";
-                comboBoxP0score.Enabled = false;
-                comboBox1.Enabled = false;
-                comboBox1.SelectedIndex = -1;
-                comboBoxP1score.Text = @"0";
-                comboBox2.Enabled = false;
-                comboBox2.SelectedIndex = -1;
-                comboBoxP2score.Text = @"0";
-                comboBox3.Enabled = false;
-                comboBox3.SelectedIndex = -1;
-                comboBoxP3score.Text = @"0";
+                PlayerReady(3, true);
             }
             else
             {
-                comboBoxP0score.Enabled = true;
-                comboBox1.Enabled = true;
-                _gamersNumb = 1;
-                comboBox1.Items.Remove(comboBox0.SelectedItem);
-                comboBox2.Items.Remove(comboBox0.SelectedItem);
-                comboBox3.Items.Remove(comboBox0.SelectedItem);
+                PlayerReady(3, false);
+                PlayerReady(4, false);
             }
-
-            //2
-            if (comboBox1.Text == "")
+            //4 игрока
+            if (comboBox2.Text != "")
             {
-                comboBoxP1score.Text = @"0";
-                comboBoxP1score.Enabled = false;
-                comboBox2.Enabled = false;
-                comboBox2.SelectedIndex = -1;
-                comboBoxP2score.Text = @"0";
-                comboBox3.Enabled = false;
-                comboBox3.SelectedIndex = -1;
-                comboBoxP3score.Text = @"0";
+                PlayerReady(4, true);
             }
             else
             {
-                comboBoxP1score.Enabled = true;
-                comboBox2.Enabled = true;
-                _gamersNumb = 2;
-                comboBox2.Items.Remove(comboBox1.SelectedItem);
-                comboBox3.Items.Remove(comboBox1.SelectedItem);
-            }
-
-            //3
-            if (comboBox2.Text == "")
-            {
-                comboBoxP2score.Text = @"0";
-                comboBoxP2score.Enabled = false;
-                comboBox3.Enabled = false;
-                comboBox3.SelectedIndex = -1;
-                comboBoxP3score.Text = @"0";
-            }
-            else
-            {
-                comboBoxP2score.Enabled = true;
-                comboBox3.Enabled = true;
-                _gamersNumb = 3;
-                comboBox3.Items.Remove(comboBox2.SelectedItem);
-            }
-
-            //4
-            if (comboBox3.Text == "")
-            {
-                comboBoxP3score.Text = @"0";
-                comboBoxP3score.Enabled = false;
-            }
-            else
-            {
-                comboBoxP3score.Enabled = true;
-                _gamersNumb = 4;
+                PlayerReady(4, false);
             }
         }
-
         //вывод результатов
-        private void OutputResultToDataBase(object sender, EventArgs e) //в базу данных
+        private void OutputResultToDataBase(object sender, EventArgs e) //сохранение в базу данных
         {
             for (int i = 0; i < NumberOfPlayer(); i++)
                 new Player(PlayerName(i), PlayerGain(i)).Save();
         }
-        private void OutputResultToTextBox(object sender, EventArgs e) //в текстовый модуль
+        private void OutputResultToTextBox(object sender, EventArgs e) //вывод рузультата в текстовый модуль
         {
             textBox1.Clear();
             for (int i = 0; i < NumberOfPlayer(); i++)
                 textBox1.Text += new Player(PlayerName(i), PlayerGain(i)).ToString();
         }
-
+        //Включение выключения игрока
+        private void PlayerReady(int number, bool ready)
+        {
+            if (!ready)
+            {
+                (groupBox2.Controls[$"comboBoxP{number - 1}score"] as ComboBox).Text = @"0"; //сбрасываем количество очков 
+                (groupBox1.Controls[$"comboBox{number - 1}"] as ComboBox).SelectedIndex = -1; //убираем имя
+            }
+            (groupBox2.Controls[$"comboBoxP{number - 1}score"] as ComboBox).Enabled = ready; //отключаем очки
+            (groupBox1.Controls[$"comboBox{number - 1}"] as ComboBox).Enabled = ready; //отключаем поле выбора имени
+        }
         //получение данных 
         private int NumberOfPlayer() //получаем количество игроков
         {
@@ -178,7 +119,6 @@ namespace GolfScore
             //сумма выигрыша
             return (AverageStroke() - Convert.ToDouble((groupBox2.Controls["comboBoxP" + i.ToString() + "score"] as ComboBox).Text)) * bet;
         }
-
         private void ToolStripStatButton_Click(object sender, EventArgs e) //получаем статистику
         {
             textBox1.Clear();
@@ -190,18 +130,19 @@ namespace GolfScore
             textBox1.Size = new Size(297, 283);
             dateTimePicker1.Visible = true;
 
-            _request = "SELECT DISTINCTROW score.Имя, Sum(score.Сумма) AS [Sum - Сумма] FROM score WHERE YEAR([Дата])= '" +
-                        dateTimePicker1.Value.Year + "'  GROUP BY score.Имя;";
-            _connection.Open();
-            _command = new OleDbCommand(_request, _connection);
-            _reader = _command.ExecuteReader();
-            while (_reader.Read())
-                textBox1.Text += (string)_reader.GetValue(0) + "\t\t" + Convert.ToString(_reader.GetValue(1)) +
-                                 Environment.NewLine;
-            _reader.Close();
-            _connection.Close();
+            string request = $"SELECT DISTINCTROW Имя, Sum(Сумма) AS [Sum - Сумма] FROM Score WHERE YEAR(Дата)= '{dateTimePicker1.Value.Year}' GROUP BY Имя";
+            using (OleDbConnection _connection = new OleDbConnection(path))
+            {
+                _connection.Open();
+                using (OleDbCommand command = new OleDbCommand(request, _connection))
+                {
+                    OleDbDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                        textBox1.Text += $"{reader.GetValue(0).ToString()}\t\t{reader.GetValue(1).ToString()}\r\n";
+                    reader.Close();
+                }
+            }
         }
-
     }
 
 

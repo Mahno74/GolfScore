@@ -23,11 +23,12 @@ namespace GolfScore
         public void Save() //сохранение итогов
         {
             string request = $"INSERT INTO score ([Имя], [Дата], [Сумма])  VALUES ('{Name}', '{DateTime.Now.ToShortDateString()}', '{Money.ToString("N1")}')";
-            OleDbConnection _connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=golfData.mdb");
-            _connection.Open();
-            var command = new OleDbCommand(request, _connection);
-            command.ExecuteNonQuery();
-            _connection.Close();
+            using (OleDbConnection connection = new OleDbConnection(Form1.path))
+            {
+                connection.Open();
+                OleDbCommand command = new OleDbCommand(request, connection);
+                command.ExecuteNonQuery();
+            }
         }
     }
 }
